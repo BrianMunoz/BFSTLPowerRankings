@@ -1,4 +1,6 @@
 var Twit = require('twit');
+var Promise  = require('bluebird').Promise;
+Promise.promisifyAll(Twit);
 
 var T = new Twit({
 	consumer_key: "dhFqk9Drau74raonudgOLIjfK",
@@ -33,23 +35,28 @@ function GetUsersFollowingBfstl()
 {
 
 	T.get('followers/ids', {user_id:bfstlId, stringify_ids:true}, function(err, data, response){
-		var ids = data.ids;
-
-		addIds(ids);
+		var ids = data.ids
+		//if(ids !== undefined)	addIds(ids);
 
 		if(data.next_cursor > 0){
+			console.log(data.next_cursor);
 			GetNextUserBatch(data.next_cursor);
 		}
 	});
 }
 
 function GetNextUserBatch(nextCursor){
-	console.log(nextCursor);
-	T.get('followers/ids', {user_id:bfstlId, stringify_ids:true, Cursor:nextCursor}, function(err, data, response){
+	T.get('followers/ids', {user_id:bfstlId, stringify_ids:true, next_cursor:nextCursor}, function(err, data, response){
 		var ids = data.ids;
-		addIds(ids);
+		if (nextCursor == data.next_cursor){
+			console.log('Cursor is not moving');
+			return;
+		}
+		if (ids.length > 0){
+		//	addIds(ids);
+		}
+		console.log(data.next_cursor);
 		if (data.next_cursor > 0){
-			console.log(data.next_cursor);
 			GetNextUserBatch(data.next_cursor);
 		}else{
 			console.log(followerIds.length);
@@ -57,13 +64,20 @@ function GetNextUserBatch(nextCursor){
 	});
 }
 
-function addIds(ids){
-	for (var i = 0; i < ids.length; i++) {
-		var name = getUserName(ids[i]);
-		console.log(name);
-		followerIds[name] = {id:ids[i]};
-	};
-}
+// function addIds(ids){
+//
+// 	for (var i = 0; i < ids.length; i++) {
+//
+// 		console.log(ids[i]);
+// 		//var namePromise = new Promise( function(resolve, reject){var name = getUserName(ids[i])});
+//
+// 		//namePromise.then(function(name){
+// 	//		console.log(name);
+// 	//		followerIds[name] = {id:ids[i]};
+// 	//	});
+//
+// 	}
+// }
 
 function processFollowerIds()
 {
@@ -76,6 +90,5 @@ function processFollowerIds()
 
 }
 
-}
 
 GetBfstlId();
