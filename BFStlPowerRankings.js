@@ -1,25 +1,15 @@
-var Twit = require('twit');
+var Twitter = require('twitter');
 var Promise  = require('bluebird').Promise;
-Promise.promisifyAll(Twit);
 
-var T = new Twit({
+var T = new Twitter({
 	consumer_key: "dhFqk9Drau74raonudgOLIjfK",
 	consumer_secret: "LL8pXdLnEUbkr3ZwDHbuNre4E5MvwVJ1rNgIHQFGJJ0FXYbWjl",
-	access_token: "4377853697-DyTtmWqjkHKseXvzWvptH9IYEh9pIHbQS90NeKr",
+	access_token_key: "4377853697-DyTtmWqjkHKseXvzWvptH9IYEh9pIHbQS90NeKr",
 	access_token_secret: "moEB9jap6HEOq97vmanUEerm9AA37RIHTrsNhOLfYlCLr"
 });
 
 
-var bfstlId = 0;
 
-function GetBfstlId(){
-	T.get('users/lookup', {screen_name: 'BestFansStLouis'}, function(err, data, response){
-		var ids = data;
-		bfstlId = data[0].id;
-		GetUsersFollowingBfstl();
-	});
-
-}
 
 function getUserName(userId)
 {
@@ -34,10 +24,15 @@ var followerIds = {};
 function GetUsersFollowingBfstl()
 {
 
-	T.get('followers/ids', {user_id:bfstlId, stringify_ids:true}, function(err, data, response){
+	T.get('followers/ids', {user_id:bfstlId, stringify_ids:false}, function(err, data, response){
 		var ids = data.ids
+		console.log('DATA: ' + ids);
+		console.log();
+		console.log('ERROR: ' + err);
+		console.log();
+		console.log('RESPONSE: ' + response);
 		//if(ids !== undefined)	addIds(ids);
-
+		console.log(data.next_cursor);
 		if(data.next_cursor > 0){
 			console.log(data.next_cursor);
 			GetNextUserBatch(data.next_cursor);
@@ -46,7 +41,7 @@ function GetUsersFollowingBfstl()
 }
 
 function GetNextUserBatch(nextCursor){
-	T.get('followers/ids', {user_id:bfstlId, stringify_ids:true, next_cursor:nextCursor}, function(err, data, response){
+	T.get('followers/ids', {user_id:bfstlId, stringify_ids:true, cursor:nextCursor}, function(err, data, response){
 		var ids = data.ids;
 		if (nextCursor == data.next_cursor){
 			console.log('Cursor is not moving');
@@ -56,7 +51,7 @@ function GetNextUserBatch(nextCursor){
 		//	addIds(ids);
 		}
 		console.log(data.next_cursor);
-		if (data.next_cursor > 0){
+		if (data.next_cursor > 0 && data.next_cursor !== nextCursor){
 			GetNextUserBatch(data.next_cursor);
 		}else{
 			console.log(followerIds.length);
@@ -64,20 +59,20 @@ function GetNextUserBatch(nextCursor){
 	});
 }
 
-// function addIds(ids){
-//
-// 	for (var i = 0; i < ids.length; i++) {
-//
-// 		console.log(ids[i]);
-// 		//var namePromise = new Promise( function(resolve, reject){var name = getUserName(ids[i])});
-//
-// 		//namePromise.then(function(name){
-// 	//		console.log(name);
-// 	//		followerIds[name] = {id:ids[i]};
-// 	//	});
-//
-// 	}
-// }
+function addIds(ids){
+
+	for (var i = 0; i < ids.length; i++) {
+
+		//console.log(ids[i]);
+		var namePromise = new Promise( function(resolve, reject){var name = getUserName(ids[i])});
+
+		namePromise.then(function(name){
+			console.log(name);
+			followerIds[name] = {id:ids[i]};
+	});
+
+	}
+}
 
 function processFollowerIds()
 {
