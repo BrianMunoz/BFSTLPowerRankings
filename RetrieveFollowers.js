@@ -1,12 +1,12 @@
 var Twitter = require('Twit');
 var MongoClient = require('MongoDB').MongoClient;
+var fs = require('fs');
+
+var tokens = fs.parseJson('TwitTokens.json')
+
 var url = 'mongodb://localhost:27017/BFSTLWeeklyTweets'
-var T = new Twitter({
-	consumer_key: "dhFqk9Drau74raonudgOLIjfK",
-	consumer_secret: "LL8pXdLnEUbkr3ZwDHbuNre4E5MvwVJ1rNgIHQFGJJ0FXYbWjl",
-	access_token: "4377853697-DyTtmWqjkHKseXvzWvptH9IYEh9pIHbQS90NeKr",
-	access_token_secret: "moEB9jap6HEOq97vmanUEerm9AA37RIHTrsNhOLfYlCLr"
-});
+
+var T = new Twitter();
 
 var bfstlId = 0;
 var database = {};
@@ -29,6 +29,8 @@ function GetLastWeekTweets(){
       SaveData(data);
     }else{
       console.log('Error getting Tweets: ' + err);
+      //save since id
+      database.close();
     }
 
   } );
@@ -44,6 +46,7 @@ function GetLastWeekTweetsAgain(id)
     else
     {
       console.log('Error getting Tweets: ' + err);
+      database.close()
     }
 
   });

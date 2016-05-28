@@ -1,12 +1,7 @@
 var Twitter = require('twitter');
 var Promise  = require('bluebird').Promise;
 
-var T = new Twitter({
-	consumer_key: "dhFqk9Drau74raonudgOLIjfK",
-	consumer_secret: "LL8pXdLnEUbkr3ZwDHbuNre4E5MvwVJ1rNgIHQFGJJ0FXYbWjl",
-	access_token_key: "4377853697-DyTtmWqjkHKseXvzWvptH9IYEh9pIHbQS90NeKr",
-	access_token_secret: "moEB9jap6HEOq97vmanUEerm9AA37RIHTrsNhOLfYlCLr"
-});
+var T = new Twitter();
 
 
 
